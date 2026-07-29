@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>矢量调色板</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 12px 30px;
+    }
+
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.06);
+      padding: 24px 20px 28px;
+      transition: box-shadow 0.3s;
+    }
+
+    /* ----- 顶部 ----- */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-left svg {
+      width: 28px;
+      height: 28px;
+      color: #1e293b;
+    }
+
+    .header-left h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #64748b;
+      transition: background 0.2s, color 0.2s;
+      touch-action: manipulation;
+    }
+
+    .icon-btn:active {
+      background: #f1f5f9;
+      transform: scale(0.94);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+
+    /* ----- 主色卡片 ----- */
+    .hero-card {
+      background: #f8fafc;
+      border-radius: 20px;
+      padding: 20px 22px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero-swatch {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: #3b82f6;
+      flex-shrink: 0;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+      transition: background 0.3s;
+    }
+
+    .hero-info {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .hero-hex {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+
+    .hero-rgb {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 2px;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+
+    .hero-actions .icon-btn {
+      background: #ffffff;
+      border: 1px solid #e9edf2;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      color: #475569;
+    }
+
+    .hero-actions .icon-btn:active {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* ----- 调色板网格 ----- */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .section-label svg {
+      width: 18px;
+      height: 18px;
+      color: #94a3b8;
+    }
+
+    .section-label span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      letter-spacing: 0.3px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .swatch {
+      aspect-ratio: 1 / 1;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      touch-action: manipulation;
+      position: relative;
+    }
+
+    .swatch:active {
+      transform: scale(0.92);
+    }
+
+    .swatch:focus-visible {
+      outline: 2px solid #0f172a;
+      outline-offset: 2px;
+    }
+
+    /* ----- 底部栏 ----- */
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-top: 18px;
+      border-top: 1px solid #f0f2f5;
+    }
+
+    .format-tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f4f9;
+      padding: 3px;
+      border-radius: 40px;
+    }
+
+    .tab {
+      padding: 5px 16px;
+      border: none;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+
+    .tab.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .tab:active {
+      transform: scale(0.94);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #b0b8c4;
+    }
+
+    .status svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ----- 取色结果（隐藏的 input） ----- */
+    #colorPicker {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* ----- 轻触反馈 ----- */
+    .toast-message {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.92);
+      background: #1e293b;
+      color: #ffffff;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .toast-message.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* ===== 🎨 优化建议：可调节配色参数 ===== */
+    /*
+      你可以修改下方 :root 中的变量来调整配色风格：
+      --palette-count: 色板数量（默认 8 个）
+      --palette-brightness: 亮度范围（0.1 ~ 2.0，越大越亮）
+      --palette-saturation: 饱和度范围（0.3 ~ 1.0，越大越鲜艳）
+      --palette-spread: 色相偏移（0 ~ 360，让色板呈现色相环变化）
+    */
+    :root {
+      --palette-count: 8;           /* 色板数量，建议 4-12 */
+      --palette-brightness: 1.0;    /* 亮度基准，1.0 为原始 */
+      --palette-saturation: 0.85;   /* 饱和度，0.5 偏灰，1.0 鲜艳 */
+      --palette-spread: 0;          /* 色相偏移，0 为同色系，30 为邻近色 */
+    }
+
+    /* 移动端优化 */
+    @media (max-width: 420px) {
+      .container {
+        padding: 18px 14px 22px;
+        border-radius: 24px;
+      }
+      .hero-card {
+        padding: 16px;
+        gap: 14px;
+      }
+      .hero-swatch {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+      }
+      .hero-hex {
+        font-size: 18px;
+      }
+      .grid {
+        gap: 8px;
+      }
+      .swatch {
+        border-radius: 14px;
+      }
+      .header-left h1 {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .hero-actions .icon-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .hero-actions .icon-btn svg {
+        width: 17px;
+        height: 17px;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .container {
+        padding: 32px 32px 36px;
+        border-radius: 32px;
+      }
+      .grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== 顶部导航 ===== -->
+  <header class="header">
+    <div class="header-left">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>
+        <path d="M12 2a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 1 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4 4 4 0 0 1-4-4z"/>
+      </svg>
+      <h1>调色板</h1>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" id="pickBtn" aria-label="取色">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18.364 5.636L5.636 18.364"/>
+          <path d="M9.879 4.464l9.193 9.193"/>
+          <path d="M4.464 9.879l9.193 9.193"/>
+          <path d="M12.707 3.293a1 1 0 0 1 1.414 0l5.657 5.657a1 1 0 0 1 0 1.414l-9.193 9.193a1 1 0 0 1-1.414 0L3.293 14.707a1 1 0 0 1 0-1.414z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="refreshBtn" aria-label="随机颜色">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== 主色卡片 ===== -->
+  <div class="hero-card">
+    <div class="hero-swatch" id="heroSwatch"></div>
+    <div class="hero-info">
+      <div class="hero-hex" id="heroHex">#3B82F6</div>
+      <div class="hero-rgb" id="heroRgb">RGB(59, 130, 246)</div>
+    </div>
+    <div class="hero-actions">
+      <button class="icon-btn" id="copyBtn" aria-label="复制色值">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="downloadBtn" aria-label="下载色值">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== 调色板网格 ===== -->
+  <div class="section-label">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="2"/>
+      <line x1="8" y1="2" x2="8" y2="22"/>
+      <line x1="16" y1="2" x2="16" y2="22"/>
+      <line x1="2" y1="8" x2="22" y2="8"/>
+      <line x1="2" y1="16" x2="22" y2="16"/>
+    </svg>
+    <span>色板</span>
+  </div>
+  <div class="grid" id="paletteGrid"></div>
+
+  <!-- ===== 底部栏 ===== -->
+  <div class="footer-row">
+    <div class="format-tabs">
+      <button class="tab active" data-format="hex">HEX</button>
+      <button class="tab" data-format="rgb">RGB</button>
+      <button class="tab" data-format="hsl">HSL</button>
+    </div>
+    <div class="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v8"/>
+        <path d="M8 12h8"/>
+      </svg>
+      <span id="statusText">点击色块取色</span>
+    </div>
+  </div>
+
+  <input type="color" id="colorPicker" value="#3B82F6">
+  <div class="toast-message" id="toast">已复制</div>
+
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // ---------- DOM 元素 ----------
+    const heroSwatch = document.getElementById('heroSwatch');
+    const heroHex = document.getElementById('heroHex');
+    const heroRgb = document.getElementById('heroRgb');
+    const paletteGrid = document.getElementById('paletteGrid');
+    const pickBtn = document.getElementById('pickBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const colorPicker = document.getElementById('colorPicker');
+    const toast = document.getElementById('toast');
+    const statusText = document.getElementById('statusText');
+    const tabs = document.querySelectorAll('.tab');
+
+    // ============================================================
+    // 🎨 优化建议：可调节配色参数（直接修改下方数值）
+    // ============================================================
+    const PALETTE_CONFIG = {
+      count: 8,           // 色板数量（建议 4-12）
+      brightness: 1.0,    // 亮度基准（0.5 偏暗，1.5 偏亮）
+      saturation: 0.85,   // 饱和度（0.3 偏灰，1.0 鲜艳）
+      hueSpread: 0,       // 色相偏移（0=同色系，30=邻近色，60=对比色）
+    };
+
+    // ---------- 状态 ----------
+    let currentColor = '#3B82F6';
+    let currentFormat = 'hex';
+
+    // ---------- 工具函数 ----------
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (!result) return { r: 0, g: 0, b: 0 };
+      return {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      };
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+          case g: h = ((b - r) / d + 2) / 6; break;
+          case b: h = ((r - g) / d + 4) / 6; break;
+        }
+      }
+      return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    }
+
+    function hslToRgb(h, s, l) {
+      h /= 360; s /= 100; l /= 100;
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(c => Math.min(255, Math.max(0, Math.round(c))).toString(16).padStart(2, '0')).join('');
+    }
+
+    function formatColor(hex, format) {
+      const { r, g, b } = hexToRgb(hex);
+      if (format === 'hex') return hex.toUpperCase();
+      if (format === 'rgb') return `RGB(${r}, ${g}, ${b})`;
+      if (format === 'hsl') {
+        const { h, s, l } = rgbToHsl(r, g, b);
+        return `HSL(${h}°, ${s}%, ${l}%)`;
+      }
+      return hex.toUpperCase();
+    }
+
+    // ============================================================
+    // 🎨 核心：基于 HSL 生成配色（支持色相偏移）
+    // ============================================================
+    function generatePalette(baseHex) {
+      const { r, g, b } = hexToRgb(baseHex);
+      const { h, s, l } = rgbToHsl(r, g, b);
+      const count = PALETTE_CONFIG.count;
+      const brightness = PALETTE_CONFIG.brightness;
+      const sat = PALETTE_CONFIG.saturation;
+      const spread = PALETTE_CONFIG.hueSpread;
+
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        // 亮度在 l 附近波动，范围 15%~85% 保持可读性
+        const t = count > 1 ? i / (count - 1) : 0.5;
+        // 亮度范围：从 l*0.6 到 l*1.4，再乘以 brightness 系数
+        const lMin = Math.max(15, l * 0.6);
+        const lMax = Math.min(85, l * 1.4);
+        let newL = lMin + (lMax - lMin) * t;
+        newL = Math.min(95, Math.max(5, newL * brightness));
+
+        // 饱和度：在 sat 附近波动，两端略低
+        let newS = sat * (0.7 + 0.6 * Math.sin(t * Math.PI));
+        newS = Math.min(100, Math.max(10, newS * 100));
+
+        // 色相：基础色相 + 偏移（让色板呈现色相环变化）
+        let newH = h + spread * (t - 0.5) * 2;
+        newH = ((newH % 360) + 360) % 360;
+
+        const rgb = hslToRgb(newH, newS, newL);
+        colors.push(rgbToHex(rgb.r, rgb.g, rgb.b));
+      }
+      return colors;
+    }
+
+    function renderPalette(colors) {
+      paletteGrid.innerHTML = '';
+      colors.forEach(hex => {
+        const div = document.createElement('div');
+        div.className = 'swatch';
+        div.style.background = hex;
+        if (hex.toLowerCase() === currentColor.toLowerCase()) {
+          div.style.borderColor = '#0f172a';
+        }
+        div.dataset.color = hex;
+        div.addEventListener('click', function(e) {
+          const color = this.dataset.color;
+          updateUI(color);
+          statusText.textContent = '已选色块';
+          showToast('已选 ' + color.toUpperCase());
+        });
+        paletteGrid.appendChild(div);
+      });
+    }
+
+    function updateUI(hex) {
+      currentColor = hex;
+      heroSwatch.style.background = hex;
+      heroHex.textContent = hex.toUpperCase();
+      heroRgb.textContent = formatColor(hex, currentFormat);
+      document.querySelectorAll('.swatch').forEach(el => {
+        const bg = el.style.background;
+        if (bg && bg.toLowerCase() === hex.toLowerCase()) {
+          el.style.borderColor = '#0f172a';
+        } else {
+          el.style.borderColor = 'transparent';
+        }
+      });
+      colorPicker.value = hex;
+    }
+
+    function refreshPalette(hex) {
+      const base = hex || currentColor;
+      const colors = generatePalette(base);
+      renderPalette(colors);
+      updateUI(base);
+    }
+
+    // ---------- 随机颜色 ----------
+    function randomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    // ---------- Toast ----------
+    let toastTimer = null;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1400);
+    }
+
+    // ---------- 复制 ----------
+    function copyCurrent() {
+      const text = formatColor(currentColor, currentFormat);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('已复制: ' + text);
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('已复制: ' + text);
+      } catch (e) {
+        showToast('复制失败');
+      }
+      document.body.removeChild(ta);
+    }
+
+    // ---------- 下载 ----------
+    function downloadColor() {
+      const text = formatColor(currentColor, currentFormat);
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `color_${currentColor.slice(1)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('已下载');
+    }
+
+    // ---------- 取色 ----------
+    function openPicker() {
+      colorPicker.click();
+    }
+
+    // ---------- 切换格式 ----------
+    function setFormat(format) {
+      currentFormat = format;
+      tabs.forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.format === format);
+      });
+      heroRgb.textContent = formatColor(currentColor, format);
+      statusText.textContent = '格式: ' + format.toUpperCase();
+    }
+
+    // ---------- 初始化 ----------
+    function init() {
+      const initial = '#3B82F6';
+      const colors = generatePalette(initial);
+      renderPalette(colors);
+      updateUI(initial);
+      setFormat('hex');
+
+      refreshBtn.addEventListener('click', function() {
+        const newColor = randomColor();
+        refreshPalette(newColor);
+        statusText.textContent = '随机刷新';
+        showToast('新配色');
+      });
+
+      pickBtn.addEventListener('click', openPicker);
+      colorPicker.addEventListener('input', function(e) {
+        const val = e.target.value;
+        refreshPalette(val);
+        statusText.textContent = '取色器选取';
+        showToast('已取色: ' + val.toUpperCase());
+      });
+
+      copyBtn.addEventListener('click', copyCurrent);
+      downloadBtn.addEventListener('click', downloadColor);
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          setFormat(this.dataset.format);
+        });
+      });
+
+      document.querySelectorAll('.icon-btn, .swatch, .tab').forEach(el => {
+        el.addEventListener('touchstart', function(e) {
+          // 被动处理，防止滚动干扰
+        }, { passive: true });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+  })();
+</script>
+</body>
+</html>
